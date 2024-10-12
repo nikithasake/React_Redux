@@ -1,0 +1,2136 @@
+React Redux
+==============
+
+1.Introduction
+===============
+=> Redux is a predictable state container for Javascript Apps
+
+* Redux is for Javascript Applications
+=>Redux is not tied for React.It can be used with react,Angular,vue or vanilla js.
+=>Redux is a library for Javascript Applications.
+
+* Redux is a State container
+=> redux stores the state of the Application
+
+Eg:LoginFormComponent
+
+state={
+    username:'',
+    password:'',
+    submitting:false
+}
+
+=>State of an app is the state represented by all the individual components of that app.
+=>Redux will store and manage the Application state
+
+* Redux is predictable
+=> Redux is a state container
+=> The state of the application can change
+Ex:Todo list app - item(pending) --> item(completed)
+=>In redux,all state transitions are explicit and it is possible to keep track of them
+=>The changes of your application's state become predictable
+
+Why Redux
+==========
+=> Manage the state of your application in a predictable way,redux can help you
+
+React + Redux
+==============
+
+why would we want to use Redux in React application?
+
+Components in React have their own state
+
+why do we need another tool to help manage that state?
+
+Eg:Consider a React Application it may consist of several components at various levels.
+ lets make a component A at the end of the component tree , this component has an input field
+ to accept the username which is stored locally within the component state ,the sibling component
+ which is component B needs to display the username.
+now how to send the username from A component to B component 
+we can do this by using lifting up state ,the state can be managed in the parent component C which
+the provides data and methods as props to component A and component B 
+Suddenly i need to display the username in F component now i have to lift the state to
+App component.Now we have a new requirement we need to display the username in component G
+the state is maintained in the app component and has to be passed as props through all 
+the intermediate components, depending on the levels of nesting this can be frustating task 
+The components which dont need the username prop still have to be aware of it.
+In the component tree if component A now updates the username that update goes all the way 
+till app component which then starts passing down the updated value as prop to the other 
+component.
+So In React Applications where u have a considerable number of components which share some common state,
+state managaement could become troublesome this is where Redux will help you out.
+with Redux your state is contained outside your components if component A wants to update the state
+it communicates with the state container,the state container updates the state in a predictable manner 
+and then sends this value to only those components that are in need of that value.
+
+React-Redux
+============
+We have a React which is UI library and we have Redux which is a state management library 
+they both work independently of each other to directly use redux in your react application is little bit difficult
+so by using React Redux package we can connect Redux with React Application.
+React Redux offers a couple of functions that help you connect your react application with redux.
+
+REACT <----------> React-Redux <------------> REDUX 
+
+React vs Redux vs React-Redux
+==============================
+=>React is a library used to build user interfaces
+=>Redux is a library for managing state in a predictable way in Javascript applications.
+=>React-redux is a library that provides bindings to use React and Redux together in an application.
+
+2.Getting Started
+==================
+=>npm init --yes
+=>npm install redux
+
+3.Three Core Concepts 
+=====================
+
+Entities                                                  activities 
+-------                                                   -----------
+Shop - Stores cakes on a shelf                          Customer - Buy a Cake
+ShopKeeper- At the front of the store                   ShopKeeper - Remove a cake from the shelf 
+Customer - At the store Entrance                                   - Receipt a keep track 
+
+Eg:Cake Shop
+We have the stop itself that stores all the cakes on a shelf,At the front of the store we have a ShopKeeper
+and At the store entrance we have a customer 
+Now what are the activities that are happen in this scenario?
+Lets assume I am the customer One day i go to the shop with the intention of buying cakes 
+now At the shop i tell the ShopKeeper that i want to buy a cake So i never jumped the counter myself take a cake
+and leave some money on the table and exit the store.
+you could do that but the ShopKeeper is there to follow a process for you to purchase a cake 
+when you make a request he will check if the cake is on the Shelf if so he will box it for you and 
+deduct a cake from his inventory and print out a receipt to keep track of the purchase that will let him 
+why the number of cakes on the self has decreased he will then box the cake and hand it to me.and i can take the 
+cake and go home.
+
+Cake Shop scenario                       Redux                  purpose 
+++++++++++++++++++                       ++++++                 ++++++++
+Shop                                     Store                  Holds the state of ur application(shop safely keeps the all the cakes in self)
+Intention to BUY_CAKE                    action                 Describes what happened(no.of cakes reduced by 1)
+ShopKeeper                               reducer                Ties the store and actions together(he receives the action from customer &
+                                                                 removes a cake from store )
+
+=> A store that holds the state of your application.
+=> An action that describes the changes in the state of the application.
+=>A reducer which actually carries out the state transition depending on the action.
+
+4.Three Principles
+==================
+
+First Principle
+---------------
+"The state of your whole application is stored in an Object tree within a single store"
+Maintain our application state in a single object which would be managed by the Redux store.
+
+Cake Shop:
+++++++++++
+
+Lets assume we are tracking the number of cakes on the self 
+
+{
+    numberOfCakes:10
+}
+
+Second Principle
+----------------
+"The only way to change the state is to emit an action,an object describing what happened"
+To update the state of your app,you need to let Redux know about that with an action.
+Not allowed to directly update the state object.
+
+Cake Shop:
++++++++++
+
+Let the shop ShopKeeper know about our action - BUY_CAKE
+{
+    type:BUY_CAKE
+}
+
+ThirdPrinciple
+--------------
+"To specify how the state tree is transformed by actions,you write pure reducers"
+
+Reducer - (PreviousState,action) => newState
+
+Cake shop
++++++++++
+Reducer is the ShopKeeper
+
+const reducer=(state,action)=>{
+    switch(action.type){
+        case BUY_CAKE:return{
+            numberOfCakes:state.numberOfCakes-1
+        }
+    }
+}
+
+Three Principles Overview:
++++++++++++++++++++++++++
+=>The application is always subscribed to the redux store,however the 
+app cannot directly update the state.
+=>If the application wants to update the state it has to emit or dispatch an 
+action.
+=>once an action has been dispatched the reducer then handles that action 
+and updates the current state.
+=>As soon as the state is updated the value is then passed on to the application
+bcse the app is subscribed to the store.
+
+
+5.Actions
+==========
+=>Actions are the only way your application can interact with the store.
+=>Actions carry some info from your app to the redux store.
+=>Actions are plain Javascript Objects however it have a 'type' property 
+that indicates the type of action being performed.
+=>The 'type' property is typically defined as string constants.
+
+code:
+-----
+const BUY_CAKE='BUY_CAKE';
+
+function buyCake(){
+  return{
+    type:BUY_CAKE,
+    info:"First redux action",
+}
+}
+
+=>The action creators simply creates the action.
+=>Action creator is a function that returns an action.
+
+Action vs Action creator :
+--------------------------
+=>Action is an object with a type property.
+{
+    type:BUY_CAKE,
+    info:"First redux action",
+}
+
+=>Action creator is a function that returns an action.
+
+6.Reducers
+==========
+=>Specify how the apps state changes in response to actions sent to the store.
+=>Function that accepts state and action as arguments,and returns the next state 
+of the application
+(PreviousState,action)=>newState
+
+code:
+-----
+const initialState={
+    initialvalue:10
+}
+
+function reducer(state=initialState,action){
+    switch(action.type){
+        case BUY_CAKE:
+            return {
+            ...state,//copy of state object
+            initialvalue:state.initialvalue-1,
+            information:action.info
+        }
+        default: 
+        console.log("prashu is in confusion");
+        return state;
+    }
+}
+
+7.Store
+========
+=>One Store for the entire application.
+
+Responsibilities:
+> Holds application state.
+> Allows access to state via getState()
+=>It exposes a method called getState which gives our application
+access to the state it holds.
+> Allows state to be updated via dispatch(action)
+=>Method called dispatch to allow any updates  to the application
+state 
+=>The dispatch method accepts an action as its parameter 
+> Registers listeners via subscribe(listener)
+=>The store also allows our application to register listeners through 
+the subscribe method 
+=>The subscribe method accepts a function as its parameter which is 
+executed any time the state in the redux store changes.
+>Handles unregistering of listeners via the function returned by
+subscribe(listener)
+=>Unsubscribe the store by calling the function that was returned by 
+subscribe method.
+
+code(Nodejs):
+-------------
+const redux =require('redux');
+const createStore=redux.createStore
+
+const store=createStore(reducer)
+//It gives the current state in the store
+console.log('Initial State',store.getState())
+//It allows the app to subscribe to changes in the store
+const unsubscribe=store.subscribe(()=>console.log('Updated State',store.getState()))
+//Store provides the dispatch method to update the state
+store.dispatch(buyCake())
+store.dispatch(buyCake())
+unsubscribe()
+
+o/p:node index
+Initial State {numberOfCakes:10}
+Updated State {numberOfCakes:9}
+Updated State {numberOfCakes:8}
+
+Code:Redux(Node js)
+===================
+=> npm init
+=>npm install redux 
+
+const redux=require('redux');
+const createStore=redux.createStore;
+
+const BUY_CAKE='BUY_CAKE';
+
+function buyCake(){
+    return {
+        type:BUY_CAKE,
+        info:"Most popular sweet"
+    }
+}
+
+const initialState={
+    initialvalue:10
+}
+
+function reducer(state=initialState,action){
+    switch(action.type){
+        case BUY_CAKE:
+            return {
+            ...state,
+            initialvalue:state.initialvalue-1,
+            information:action.info
+        }
+        default: 
+        console.log("prashu is in confusion");
+        return state;
+    }
+}
+const store=createStore(reducer);
+console.log("Initial State",store.getState());
+store.subscribe(()=>console.log("Updated State",store.getState()));
+store.dispatch(buycake());
+store.dispatch(buycake());
+store.dispatch(buycake());
+
+Run the file : node SingleFileReduxOperationsUsingNode.js
+
+o/p:
+prashu is in confusion
+Initial State { initialvalue: 10 }
+Updated State { initialvalue: 9, information: 'Most popular sweet' }
+Updated State { initialvalue: 8, information: 'Most popular sweet' }
+Updated State { initialvalue: 7, information: 'Most popular sweet' }
+
+
+
+Code:Redux(React js)[myself]
+=====================
+=>npm install redux 
+
+foldername:single_file_redux_operations
+
+import { createStore } from 'redux';
+
+const BUY_PALKOVA='PALKOVA';
+
+function reduxoperations(props){
+function buypalkova(){
+    return {
+        type:BUY_PALKOVA,
+        info:"Most popular sweet"
+    }
+}
+
+const initialState={
+    initialvalue:10
+}
+
+function reducer(state=initialState,action){
+    switch(action.type){
+        case BUY_PALKOVA:
+            return {
+            ...state,
+            initialvalue:state.initialvalue-1,
+            information:action.info
+        }
+        default: 
+        console.log("prashu is in confusion");
+        return state;
+    }
+}
+const store=createStore(reducer);
+console.log("Initial State",store.getState());
+store.subscribe(()=>console.log("Updated State",store.getState()));
+store.dispatch(buypalkova());
+store.dispatch(buypalkova());
+store.dispatch(buypalkova());
+}
+
+export default reduxoperations;
+
+
+o/p:
+prashu is in confusion
+ Initial State {initialvalue: 10}
+ Updated State {initialvalue: 9, information: 'Most popular sweet'}
+ Updated State {initialvalue: 8, information: 'Most popular sweet'}
+ Updated State {initialvalue: 7, information: 'Most popular sweet'}
+
+8.Cakes and IceCreams
+=====================
+CakeShop
+Cakes stored on the shelf
+ShopKeeper to handle BUY_CAKE from Customer(we have a ShopKeeper & Customer the customer informs the ShopKeeper
+that he wants to buy a cake the ShopKeeper then takes one off the shelf
+and hands it over to the customer).
+
+IceCreams
+IceCreams stored in the freezer
+New ShopKeeper to hanle BUY_ICECREAM from Customer
+
+why Seperate ShopKeepers?
+=>Scalability
+=>If something goes wrong as well it is also easier to catch hold of that 
+particular ShopKeeper and learn about what happened.
+
+9.Multiple Reducers:
+====================
+
+Code:Redux(Node js)
+===================
+=> npm init
+=>npm install redux 
+
+const redux=require('redux');
+const createStore=redux.createStore;
+
+const BUY_CAKE='BUY_CAKE';
+const BUY_ICECREAM='BUY_ICECREAM';
+
+function buyCake(){
+    return {
+        type:BUY_CAKE,
+        info:"Most popular sweet"
+    }
+}
+function buyIcecream(){
+    return {
+        type:BUY_ICECREAM,
+        info:"Most popular sweet"
+    }
+}
+
+const initialState={
+    initialvalueofCake:10,
+    initialvalueofIcecream:10
+}
+
+function reducer(state=initialState,action){
+    switch(action.type){
+        case BUY_CAKE:
+            return {
+            ...state,
+            initialvalueofCake:state.initialvalueofCake-1,
+            information:action.info
+        }
+        case BUY_ICECREAM:
+            return {
+            ...state,
+            initialvalueofIcecream:state.initialvalueofIcecream-1,
+            information:action.info
+        }
+        default: 
+        console.log('prashu is in confusion);
+        return state;
+    }
+}
+const store=createStore(reducer);
+console.log("Initial State",store.getState());
+store.subscribe(()=>console.log("Updated State",store.getState()));
+store.dispatch(buyCake());
+store.dispatch(buyIcecream());
+
+Run the file : node SingleFileReduxOperationsUsingNode.js
+
+o/p:
+prashu is in confusion
+Initial State { initialvalueofCake: 10 ,initialvalueofIcecream:10}
+Updated State { initialvalueofCake: 9 ,initialvalueofIcecream:10}
+Updated State { initialvalueofCake: 9 ,initialvalueofIcecream:9}
+
+
+code(React):[myself]
+---------------------
+=>npm i redux 
+
+foldername:single_file_multiple_reducers
+
+import { createStore } from 'redux';
+const BUY_PALKOVA='PALKOVA';
+const BUY_CAKE='CAKE';
+
+function MultipleReducers(){
+function buypalkova(){
+    return {
+        type:BUY_PALKOVA,
+        info:"Most popular sweet"
+    }
+}
+function buycake(){
+    return {
+        type:BUY_CAKE,
+        info:"Most popular cake"
+    }
+}
+
+const initialState={
+    initialvalueofPalkova:10,
+    initialvalueofCake:10
+}
+
+
+function reducer(state=initialState,action){
+    switch(action.type){
+        case BUY_PALKOVA:
+            console.log("Buy palkova");
+            return {
+            ...state,
+            initialvalueofPalkova:state.initialvalueofPalkova-1,
+            information:action.info
+        }
+        case BUY_CAKE:
+            console.log("Buy cake");
+            return {
+            ...state,
+            initialvalueofCake:state.initialvalueofCake-1,
+            information:action.info
+        }
+        default: 
+        console.log("prashu is in confusion");
+        return state;
+    }
+}
+const store=createStore(reducer);
+console.log("Initial State",store.getState());
+store.subscribe(()=>console.log("Updated State",store.getState()));
+store.dispatch(buypalkova());
+store.dispatch(buycake());
+store.dispatch(buycake());
+}
+export default MultipleReducers;
+
+o/p:
+
+prashu is in confusion
+Initial State {initialvalueofPalkova: 10, initialvalueofCake: 10}
+Buy palkova
+Updated State {initialvalueofPalkova: 9, initialvalueofCake: 10, information: 'Most popular sweet'}
+Buy cake
+Updated State {initialvalueofPalkova: 9, initialvalueofCake: 9, information: 'Most popular cake'}
+Buy cake
+Updated State {initialvalueofPalkova: 9, initialvalueofCake: 8, information: 'Most popular cake'}
+
+10.combineReducers
+==================
+
+Code:Redux(Node js)
+===================
+=> npm init
+=>npm install redux 
+
+const redux=require('redux');
+const createStore=redux.createStore
+const combineReducers=redux.combineReducers
+
+const BUY_CAKE='BUY_CAKE';
+const BUY_ICECREAM='BUY_ICECREAM';
+
+function buyCake(){
+    return {
+        type:BUY_CAKE,
+        infocake:"Most popular cake"
+    }
+}
+function buyIcecream(){
+    return {
+        type:BUY_ICECREAM,
+        infoIcecream:"Most popular icecream"
+    }
+}
+
+const initialStateOfCake={
+    initialvalueofCake:10,
+    
+}
+
+const initialStateOfIceCream={
+    initialvalueofIcecream:10
+}
+
+function reducerofCake(state=initialStateOfCake,action){
+    switch(action.type){
+        case BUY_CAKE:
+            console.log("Buy cake");
+            return {
+            ...state,
+            initialvalueofCake:state.initialvalueofCake-1,
+            information:action.infocake
+        }
+        default:  
+        return state;
+    }
+}
+
+function reducerofIcecream(state=initialStateOfIceCream,action){
+    switch(action.type){
+        case BUY_ICECREAM:
+            console.log("Buy IceCream");
+            return {
+            ...state,
+            initialvalueofIcecream:state.initialvalueofIcecream-1,
+            information:action.infoIcecream
+        }
+        default: 
+        return state;
+    }
+}
+
+const rootReducer=combineReducers({
+    cake:reducerofCake,
+    icecream:reducerofIcecream
+});
+const store=createStore(rootReducer);
+console.log("Initial State",store.getState());
+store.subscribe(()=>console.log("Updated State",store.getState()));
+store.dispatch(buycake());
+store.dispatch(buyIcecream());
+
+
+Run the file : node SingleFileReduxOperationsUsingNode.js
+
+o/p:
+Initial State { cake:{initialvalueofCake: 10 },icecream:{initialvalueofIcecream:10}}
+Updated State { cake:{initialvalueofCake: 9 },icecream:{initialvalueofIcecream:10}}
+Updated State { cake:{initialvalueofCake: 9 },icecream:{initialvalueofIcecream:8}}
+
+
+code(React)[myself]
+-------------------
+=>npm install redux
+
+foldername:single_file_combine_reducers
+
+import { createStore } from 'redux';
+import { combineReducers } from 'redux';
+const BUY_PALKOVA='PALKOVA';
+const BUY_CAKE='CAKE';
+
+function SingleFileCombineReducers(props){
+function buypalkova(){
+    return {
+        type:BUY_PALKOVA,
+        infopalkova:"Most popular sweet"
+    }
+}
+function buycake(){
+    return {
+        type:BUY_CAKE,
+        infocake:"Most popular cake"
+    
+}
+
+const initialStateOfPalkova={
+    initialvalueofPalkova:10,
+    
+}
+
+const initialStateOfCake={
+    initialvalueofCake:10
+}
+
+function reducerofPalkova(state=initialStateOfPalkova,action){
+    switch(action.type){
+        case BUY_PALKOVA:
+            console.log("Buy palkova");
+            return {
+            ...state,
+            initialvalueofPalkova:state.initialvalueofPalkova-1,
+            information:action.infopalkova
+        }
+        default:  
+        return state;
+    }
+}
+
+function reducerofCake(state=initialStateOfCake,action){
+    switch(action.type){
+        case BUY_CAKE:
+            console.log("Buy cake");
+            return {
+            ...state,
+            initialvalueofCake:state.initialvalueofCake-1,
+            information:action.infocake
+        }
+        default: 
+        return state;
+    }
+}
+
+const reducers=combineReducers({reducerofPalkova,reducerofCake});
+const store=createStore(reducers);
+console.log("Initial State",store.getState());
+store.subscribe(()=>console.log("Updated State",store.getState()));
+store.dispatch(buypalkova());
+store.dispatch(buycake());
+store.dispatch(buycake());
+// props.name(store);
+}
+}
+
+export default SingleFileCombineReducers;
+
+o/p:
+Initial State
+ {reducerofPalkova: {…}, reducerofCake: {…}}
+ reducerofCake: {initialvalueofCake: 10}reducerofPalkova: {initialvalueofPalkova: 10}
+ [[Prototype]]: Object
+
+Buy palkova
+Updated State {reducerofPalkova: {…}, reducerofCake: {…}}
+reducerofCake: {initialvalueofCake: 10}
+reducerofPalkova: {initialvalueofPalkova: 9, information: 'Most popular sweet'}
+[[Prototype]]: Object
+
+Buy cake
+Updated State {reducerofPalkova: {…}, reducerofCake: {…}}
+reducerofCake: {initialvalueofCake: 9, information: 'Most popular cake'}
+reducerofPalkova: {initialvalueofPalkova: 9, information: 'Most popular sweet'}
+[[Prototype]]: Object
+
+
+Buy cake
+Updated State {reducerofPalkova: {…}, reducerofCake: {…}}
+reducerofCake: {initialvalueofCake: 8, information: 'Most popular cake'}
+reducerofPalkova: {initialvalueofPalkova: 9, information: 'Most popular sweet'}
+[[Prototype]]:Object
+
+11.Middleware 
+=============
+=>It is the way to extend Redux with custom functionality.
+=>If we want the redux with extra features then we can use Middleware
+=>It provides a thrid-party extension point b/w dispatching an action,and 
+the moment it reaches the reducer.
+=>we can use Middleware for logging,crash reporting,performing asynchronous tasks etc.
+
+Code:Redux(Node js)
+===================
+=> npm init
+=>npm install redux redux-logger
+
+const redux=require('redux');
+const reduxLogger=require('redux-logger')
+
+const createStore=redux.createStore
+const combineReducers=redux.combineReducers
+const applyMiddleware=redux.applyMiddleware
+const logger=reduxLogger.createLogger()
+
+const BUY_CAKE='BUY_CAKE';
+const BUY_ICECREAM='BUY_ICECREAM';
+
+function buycake(){
+    return {
+        type:BUY_CAKE,
+        infopalkova:"Most popular cake"
+    }
+}
+function buyIcecream(){
+    return {
+        type:BUY_ICECREAM,
+        infoIcecream:"Most popular icecream"
+    }
+}
+
+const initialStateOfCake={
+    initialvalueofCake:10,
+    
+}
+
+const initialStateOfIceCream={
+    initialvalueofIcecream:10
+}
+
+function reducerofCake(state=initialStateOfCake,action){
+    switch(action.type){
+        case BUY_CAKE:
+            console.log("Buy Cake");
+            return {
+            ...state,
+            initialvalueofCake:state.initialvalueofCake-1,
+            information:action.infocake
+        }
+        default:  
+        return state;
+    }
+}
+
+function reducerofIcecream(state=initialStateOfIceCream,action){
+    switch(action.type){
+        case BUY_ICECREAM:
+            console.log("Buy IceCream");
+            return {
+            ...state,
+            initialvalueofIcecream:state.initialvalueofIcecream-1,
+            information:action.infoIcecream
+        }
+        default: 
+        return state;
+    }
+}
+
+const rootReducer=combineReducers({
+    cake:reducerofCake,
+    icecream:reducerofIcecream
+});
+const store=createStore(rootReducer,applyMiddleware(logger));
+console.log("Initial State",store.getState());
+store.subscribe(()=>console.log("Updated State",store.getState()));
+store.dispatch(buycake());
+store.dispatch(buyIcecream());
+
+
+Run the file : node SingleFileReduxOperationsUsingNode.js
+
+o/p:
+Initial State {
+  cake: { initialvalueofCake: 10 },
+  icecream: { initialvalueofIcecream: 10 }
+}
+Buy Cake
+Updated State {
+  cake: { initialvalueofCake: 9, information: undefined },
+  icecream: { initialvalueofIcecream: 10 }
+}
+ action BUY_CAKE @ 13:19:16.725
+   prev state {
+    cake: { initialvalueofCake: 10 },
+    icecream: { initialvalueofIcecream: 10 }
+  }
+   action     { type: 'BUY_CAKE', infopalkova: 'Most popular cake' }
+   next state {
+    cake: { initialvalueofCake: 9, information: undefined },
+    icecream: { initialvalueofIcecream: 10 }
+  }
+Buy IceCream
+Updated State {
+  cake: { initialvalueofCake: 9, information: undefined },
+  icecream: { initialvalueofIcecream: 9, information: 'Most popular icecream' }
+}
+ action BUY_ICECREAM @ 13:19:16.728
+   prev state {
+    cake: { initialvalueofCake: 9, information: undefined },
+    icecream: { initialvalueofIcecream: 10 }
+  }
+   action     { type: 'BUY_ICECREAM', infoIcecream: 'Most popular icecream' }
+   next state {
+    cake: { initialvalueofCake: 9, information: undefined },
+    icecream: { initialvalueofIcecream: 9, information: 'Most popular icecream' }
+  }
+
+
+
+code(React)[myself]
+====================
+=>npm i redux  redux-logger
+foldername:single_file_redux_operations_middleware
+
+import { createStore } from 'redux';
+import { combineReducers } from 'redux';
+import { createLogger } from 'redux-logger';
+import { applyMiddleware } from 'redux';
+
+
+const BUY_PALKOVA='PALKOVA';
+const BUY_CAKE='CAKE';
+
+function reduxoperations(props){
+function buypalkova(){
+    return {
+        type:BUY_PALKOVA,
+        infopalkova:"Most popular sweet"
+    }
+}
+function buycake(){
+    return {
+        type:BUY_CAKE,
+        infocake:"Most popular cake"
+    }
+}
+
+const initialStateOfPalkova={
+    initialvalueofPalkova:10,
+    
+}
+
+const initialStateOfCake={
+    initialvalueofCake:10
+}
+
+function reducerofPalkova(state=initialStateOfPalkova,action){
+    switch(action.type){
+        case BUY_PALKOVA:
+            console.log("Buy palkova");
+            return {
+            ...state,
+            initialvalueofPalkova:state.initialvalueofPalkova-1,
+            information:action.infopalkova
+        }
+        default:  
+        return state;
+    }
+}
+
+function reducerofCake(state=initialStateOfCake,action){
+    switch(action.type){
+        case BUY_CAKE:
+            console.log("Buy cake");
+            return {
+            ...state,
+            initialvalueofCake:state.initialvalueofCake-1,
+            information:action.infocake
+        }
+        default: 
+        return state;
+    }
+}
+
+const reducers=combineReducers({reducerofPalkova,reducerofCake});
+const store=createStore(reducers,applyMiddleware(createLogger()));
+store.subscribe(()=>{});
+store.dispatch(buypalkova());
+store.dispatch(buycake());
+store.dispatch(buycake());
+// props.name(store);
+}
+
+
+export default reduxoperations;
+
+o/p:
+Buy palkova
+action PALKOVA @ 10:43:59.524
+prev state {reducerofPalkova: {…}, reducerofCake: {…}}
+action     {type: 'PALKOVA', infopalkova: 'Most popular sweet'}
+next state {reducerofPalkova: {…}, reducerofCake: {…}}
+
+Buy cake
+action CAKE @ 10:43:59.526
+prev state {reducerofPalkova: {…}, reducerofCake: {…}}
+action  {type: 'CAKE', infocake: 'Most popular cake'}
+next state {reducerofPalkova: {…}, reducerofCake: {…}}
+
+Buy cake
+action CAKE @ 10:43:59.527
+prev state {reducerofPalkova: {…}, reducerofCake: {…}}
+action  {type: 'CAKE', infocake: 'Most popular cake'}
+next state {reducerofPalkova: {…}, reducerofCake: {…}}
+
+12 - Async Actions
+===================
+=>Upto now we have completed the Synchronous actions.
+
+Synchronous Actions
+------------------
+=>As soon as an action was dispatched,the state was immediately updated.
+=>If you dispatch the BUY_CAKE action,the numberOfCakes was right away decremented by 1.
+=>Same with BUY_ICECREAM action as well.
+
+
+Async Actions
+--------------
+=>Asyncronous API calls to fetch data from an end point and use that data 
+in your application.
+
+Our Application:
+++++++++++++++++
+=>Fetches a list of Users from an API end point and stores it in the redux store.
+
+State:
+-----
+=>Typically with data fetching we go with 3 properties for the state object
+the first property is a loading flag which indicates whether the data is currently being 
+fetched or not.
+=>Second property is the data 
+=>Final property is the error msg.
+
+state={
+    loading:true,
+    data:[],
+    error:''
+}
+
+loading:Display a loading spinner in your component.
+data:List of users.
+error:Display error to the user.
+
+Actions:
+-------
+FETCH_STATUS_REQUEST : Fetch list of users
+FETCH_STATUS_SUCCESS : Fetched successfully
+FETCH_STATUS_FAILURE : Error fetching the data
+
+Reducers:
+---------
+case:FETCH_STATUS_REQUEST
+    loading:true
+
+case:FETCH_STATUS_SUCCESS
+    loading:false
+    users:data(from API)
+
+case:FETCH_STATUS_FAILURE
+    loading:false   
+    error:error(from API)
+
+Code(Node js):
+--------------
+const redux=require('redux');
+const createStore=redux.createStore
+
+const intialState ={
+
+    loading: false,
+    users: [],
+    error: ''
+
+}
+
+const FETCH_STATUS_SUCCESS = "FETCH_STATUS_SUCCESS";
+const FETCH_STATUS_REQUEST = "FETCH_STATUS_REQUEST";
+const FETCH_STATUS_FAILURE = "FETCH_STATUS_FAILURE";
+
+const  fectchUsersRequest=()=>{
+return{
+    type:FETCH_STATUS_REQUEST,
+    }
+}
+
+const fetchUsersSuccess=(users)=>{
+    return{
+        type:FETCH_STATUS_SUCCESS,
+        payload:users
+    }
+}
+
+const fetchUsersFailure=(error)=>{
+    return{
+        type:FETCH_STATUS_FAILURE,
+        payload:error
+    }
+}
+
+const Reducer = (state = intialState, action) =>{
+    switch(action.type){
+        case FETCH_STATUS_REQUEST:
+                return{
+                   ...state,
+                   loading:true
+                }
+        case FETCH_STATUS_SUCCESS:
+            return{
+                loading:false,
+                users:action.payload
+
+            }
+        case FETCH_STATUS_FAILURE:
+            return{
+              loading:false,
+              users:[],
+              error:action.payload
+            }
+        default:
+            return state;
+
+    }
+
+}
+
+const store=createStore(Reducer);
+store.subscribe(()=>console.log(store.getState()));
+13-Redux Thunk Middleware 
+======================
+Async action creators
+---------------------
+=>axios is used to make request to an api endpoint
+=>redux-thunk is used to define asynchronous action creators.
+=>redux-thunk library basically is a Middleware we will be applying 
+to our store.
+
+
+
+
+Code(Node js):
+--------------
+=>npm i redux redux-logger axios redux-thunk
+
+const redux=require('redux');
+const createStore=redux.createStore
+const applyMiddleware=redux.applyMiddleware
+const thunk=require('redux-thunk').default
+const axios=require('axios')
+
+const intialState ={
+
+    loading: false,
+    users: [],
+    error: ''
+
+}
+
+const FETCH_STATUS_SUCCESS = "FETCH_STATUS_SUCCESS";
+const FETCH_STATUS_REQUEST = "FETCH_STATUS_REQUEST";
+const FETCH_STATUS_FAILURE = "FETCH_STATUS_FAILURE";
+
+const  fectchUsersRequest=()=>{
+return{
+    type:FETCH_STATUS_REQUEST,
+    }
+}
+
+const fetchUsersSuccess=(users)=>{
+    return{
+        type:FETCH_STATUS_SUCCESS,
+        payload:users
+    }
+}
+
+const fetchUsersFailure=(error)=>{
+    return{
+        type:FETCH_STATUS_FAILURE,
+        payload:error
+    }
+}
+
+const Reducer = (state = intialState, action) =>{
+    switch(action.type){
+        case FETCH_STATUS_REQUEST:
+                return{
+                   ...state,
+                   loading:true
+                }
+        case FETCH_STATUS_SUCCESS:
+            return{
+                loading:false,
+                users:action.payload
+
+            }
+        case FETCH_STATUS_FAILURE:
+            return{
+              loading:false,
+              users:[],
+              error:action.payload
+            }
+        default:
+            return state;
+
+    }
+
+}
+
+//Redux Thunk Middleware for Async 
+//For a action creator it is returning a function instead of action
+const fetchUsers=()=>{
+    return function(dispatch){
+        dispatch(fectchUsersRequest())
+        axios.get("https://jsonplaceholder.typicode.com/users")
+        .then(response=>{
+            const users=response.data.map(user=>user.id)
+            dispatch(fetchUsersSuccess(users));
+        })
+        .catch(error=>{
+         dispatch(fetchUsersFailure(error));
+        })
+    }
+}
+
+
+
+const store=createStore(Reducer,applyMiddleware(thunk));
+store.subscribe(()=>console.log(store.getState()));
+store.dispatch(fetchUsers())
+
+o/p:
+{loading:true,users:[],error:''}
+{loading:false,
+users:{1,2,3,4,5,6,7,8,9,10},
+error:''}
+
+if u change url then 
+{loading:true,users:[],error:''}
+{loading:false,
+users:[],
+error:'getdatainfo ENOTFOUND jsonplaceholder.typicode jsonplaceholder.typicode.com}
+
+code(React)[myself]:
+===========
+=>npm i redux redux-logger axios redux-thunk
+
+foldername:single_file_redux_thunk_middleware
+
+import { createStore } from "redux";
+import  thunk from "redux-thunk";
+import axios from "axios";
+import { applyMiddleware } from "redux";
+
+function FetchApi(){
+const intialState ={
+
+    loading: false,
+    users: [],
+    error: ''
+
+}
+
+const FETCH_STATUS_SUCCESS = "Fetch_status_success";
+const FETCH_STATUS_REQUEST = "Fetch_Status_Request";
+const FETCH_STATUS_FAILURE = "Fetch_Status_Failure";
+
+const  fectchUsersRequest=()=>{
+return{
+    type:FETCH_STATUS_REQUEST,
+    }
+}
+
+const fetchUsersSuccess=(users)=>{
+    return{
+        type:FETCH_STATUS_SUCCESS,
+        payload:users
+    }
+}
+
+const fetchUsersFailure=(error)=>{
+    return{
+        type:FETCH_STATUS_FAILURE,
+        payload:error
+    }
+}
+
+const Reducer = (state = intialState, action) =>{
+    switch(action.type){
+        case FETCH_STATUS_REQUEST:
+                return{
+                   ...state,
+                   loading:true
+                }
+        case FETCH_STATUS_SUCCESS:
+            return{
+                loading:false,
+                users:action.payload
+
+            }
+        case FETCH_STATUS_FAILURE:
+            return{
+              loading:false,
+              users:[],
+              error:action.payload
+            }
+        default:
+            return state;
+
+    }
+
+}
+
+//Redux Thunk Middleware for Async 
+//For a action creator it is returning a function instead of action
+const fetchUsers=()=>{
+    return function(dispatch){
+        dispatch(fectchUsersRequest())
+        axios.get("https://jsonplaceholder.typicode.com/users")
+        .then(response=>{
+            const users=response.data.map(user=>user.id)
+            dispatch(fetchUsersSuccess(users));
+        })
+        .catch(error=>{
+         dispatch(fetchUsersFailure(error));
+        })
+    }
+}
+
+
+
+const store=createStore(Reducer,applyMiddleware(thunk));
+store.subscribe(()=>console.log(store.getState()));
+store.dispatch(fetchUsers());
+}
+export default FetchApi;
+
+o/p:
+{loading: true, users: Array(0), error: ''}
+error: ""
+loading: true
+users: []
+[[Prototype]]: Object
+
+{loading: false, users: Array(10)}
+loading: false
+users: (10) [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+[[Prototype]]: Object
+
+14-React Redux Setup
+==================
+=>Upto now we have completed the concepts in redux 
+Now we have to understand those concepts in React.
+
+=>we have a React application and the state of the application is 
+maintained separately in the Redux Store.Our appplication is always subscribed
+to the redux store However the app cannot directly update the state
+if the application wants to update the state it has to emit or dispatch 
+an action once an action has been dispatched the reducer then handles that 
+action and updates the current state.
+As soon as the state is updated the value is then passed on to the 
+application because the app is subscribed to the store.
+
+=>npm install redux react-redux
+
+15-Actions
+==========
+CakeAction.js:
+-------------
+export const BUY_CAKE = "BUY_CAKE";
+
+CakeActionType.js:
+------------------
+import {BUY_CAKE} from './CakeAction'
+
+function BuyCakeAction(){
+    return {
+        type:BUY_CAKE
+    }
+}
+export default BuyCakeAction;
+
+16-Reducers
+===========
+CakeReducer.js
+--------------
+import ActionType from './CakeActionType'
+import { BUY_CAKE } from './CakeAction'
+
+const initialState ={
+    cakes: 10
+}
+
+function CakeReducer(state = initialState, action){
+
+    switch(action.type){
+        case BUY_CAKE:
+            
+            return {
+                cakes: state.cakes-1,
+                
+            }
+        default:
+            return state;
+    }
+
+}
+
+export default CakeReducer;
+
+17-Store
+========
+CakeStore.js
+------------
+import {createStore} from 'redux'
+import cakeReducer from './CakeReducer'
+
+const store = createStore(cakeReducer);
+
+export default store;
+
+=>To Provide this Store to React Application the React Redux library exports 
+a component called Provider. 
+
+How does the Provider component know about the Redux store?
+=>We need to specify that as a prop 
+
+App.js
+------
+import logo from './logo.svg';
+import './App.css';
+import { Provider } from 'react-redux';
+import store from './Cake/CakeStore';
+import DisplayCakesWithoutHooks from './DisplayCakes/DisplayCakesWithoutHooks';
+
+function App() {
+  return (
+    <div className="App">
+      <Provider store={store}>
+          <h1>Performing Redux Operations using Multiple Files without Hooks</h1>
+          <DisplayCakesWithoutHooks/>
+      </Provider>
+    </div>
+  );
+}
+
+export default App;
+
+ 18 - connect
+ =============
+ 
+DisplayCakes
+------------
+import {connect} from 'react-redux';
+import BuyCakeAction from '../Cake/CakeActionType'
+
+function DisplayCakesWithoutHooks(props){
+    return (
+        <>
+            <h3>Number of cakes left : {props.updateCake}</h3>
+            <button onClick={() => {props.buyCake()}}>BuyCake</button>
+        </>
+    )
+}
+
+function mapStateToProps(state)
+{
+    return {
+        updateCake: state.cakes
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    // console.log(dispatch,1);
+    return {
+        buyCake : () =>{
+            dispatch(BuyCakeAction())
+        } 
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(DisplayCakesWithoutHooks);
+
+Multiple Files Redux without Hooks
+++++++++++++++++++++++++++++++++++
+=>npm install redux react-redux
+
+foldername:multiple_files_redux_operations_without Hooks
+
+code(React):Redux operations without Hooks
+++++++++++++
+
+CakeAction.js:
+-------------
+export const BUY_CAKE = "BUY_CAKE";
+
+CakeActionType.js:
+------------------
+import {BUY_CAKE} from './CakeAction'
+
+function BuyCakeAction(){
+    return {
+        type:BUY_CAKE
+    }
+}
+export default BuyCakeAction;
+
+CakeReducer.js
+--------------
+import ActionType from './CakeActionType'
+import { BUY_CAKE } from './CakeAction'
+
+const initialState ={
+    cakes: 10
+}
+
+function CakeReducer(state = initialState, action){
+
+    switch(action.type){
+        case BUY_CAKE:
+            
+            return {
+                cakes: state.cakes-1,
+                
+            }
+        default:
+            return state;
+    }
+
+}
+
+export default CakeReducer;
+
+CakeStore.js
+------------
+import {createStore} from 'redux'
+import cakeReducer from './CakeReducer'
+
+const store = createStore(cakeReducer);
+
+export default store;
+
+
+DisplayCakes
+------------
+import {connect} from 'react-redux';
+import BuyCakeAction from '../Cake/CakeActionType'
+
+function DisplayCakesWithoutHooks(props){
+    return (
+        <>
+            <h3>Number of cakes left : {props.updateCake}</h3>
+            <button onClick={() => {props.buyCake()}}>BuyCake</button>
+        </>
+    )
+}
+
+function mapStateToProps(state)
+{
+    return {
+        updateCake: state.cakes
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    // console.log(dispatch,1);
+    return {
+        buyCake : () =>{
+            dispatch(BuyCakeAction())
+        } 
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(DisplayCakesWithoutHooks);
+
+App.js
+------
+import logo from './logo.svg';
+import './App.css';
+import { Provider } from 'react-redux';
+import store from './Cake/CakeStore';
+import DisplayCakesWithoutHooks from './DisplayCakes/DisplayCakesWithoutHooks';
+
+function App() {
+  return (
+    <div className="App">
+      <Provider store={store}>
+          <h1>Performing Redux Operations using Multiple Files without Hooks</h1>
+          <DisplayCakesWithoutHooks/>
+      </Provider>
+    </div>
+  );
+}
+
+export default App;
+
+
+o/p:multiple_files_redux_operations without Hooks(before click).png
+multiple_files_redux_operations without Hooks(after click).png
+
+19-React Redux with Hooks
+=========================
+React Redux pattern
+--------------------
+Action creators,reducers,provide the store and connect the components.
+Components can access state and dispatch actions.
+
+React Hooks
+-----------
+Subscribe to Store and dispatch actions without connect()
+
+20-useSelector
+===============
+
+DisplayCakes.js
+----------------
+import BuyCakeAction from '../Cake/CakeActionType'
+import {useSelector,useDispatch} from 'react-redux';
+
+function DisplayCakesWithHooks(){
+    const cakevalue=useSelector((state)=>state.cakes);
+   
+    return (
+        <>
+            <h3>Number of cakes left : {cakevalue}</h3>
+        </>
+    )
+}
+
+
+export default DisplayCakesWithHooks;
+
+21-useDispatch
+==============
+DisplayCakes.js
+----------------
+import BuyCakeAction from '../Cake/CakeActionType'
+import {useSelector,useDispatch} from 'react-redux';
+
+function DisplayCakesWithHooks(){
+    const cakevalue=useSelector((state)=>state.cakes);
+    const dispatch=useDispatch();
+    return (
+        <>
+            <h3>Number of cakes left : {cakevalue}</h3>
+            <button onClick={() => dispatch(BuyCakeAction())}>BuyCake</button>
+        </>
+    )
+}
+
+
+export default DisplayCakesWithHooks;
+
+
+Multiple Files Redux with Hooks
+===============================
+=>npm install redux react-redux
+
+foldername:multiple_files_redux_operations_with_hooks
+
+code(React):Redux operations with Hooks
+++++++++++++
+
+CakeAction.js:
+-------------
+export const BUY_CAKE = "BUY_CAKE";
+
+CakeActionType.js:
+------------------
+import {BUY_CAKE} from './CakeAction'
+
+function BuyCakeAction(){
+    return {
+        type:BUY_CAKE
+    }
+}
+export default BuyCakeAction;
+
+CakeReducer.js
+--------------
+import ActionType from './CakeActionType'
+import { BUY_CAKE } from './CakeAction'
+
+const initialState ={
+    cakes: 10
+}
+
+function CakeReducer(state = initialState, action){
+
+    switch(action.type){
+        case BUY_CAKE:
+            
+            return {
+                cakes: state.cakes-1,
+                
+            }
+        default:
+            return state;
+    }
+
+}
+
+export default CakeReducer;
+
+CakeStore.js
+------------
+import {createStore} from 'redux'
+import cakeReducer from './CakeReducer'
+
+const store = createStore(cakeReducer);
+
+export default store;
+
+DisplayCakes.js
+----------------
+import BuyCakeAction from '../Cake/CakeActionType'
+import {useSelector,useDispatch} from 'react-redux';
+
+function DisplayCakesWithHooks(){
+    const cakevalue=useSelector((state)=>state.cakes);
+    const dispatch=useDispatch();
+    return (
+        <>
+            <h3>Number of cakes left : {cakevalue}</h3>
+            <button onClick={() => dispatch(BuyCakeAction())}>BuyCake</button>
+        </>
+    )
+}
+
+
+export default DisplayCakesWithHooks;
+
+App.js
+------
+import logo from './logo.svg';
+import './App.css';
+import { Provider } from 'react-redux';
+import store from './Cake/CakeStore';
+import DisplayCakesWithHooks from './DisplayCakes/DisplayCakesWithHooks';
+function App() {
+  return (
+    <div className="App">
+      <Provider store={store}>
+      <h1>Performing Redux Operations using Multiple Files with Hooks</h1>
+      <DisplayCakesWithHooks/>
+      </Provider>
+    </div>
+  );
+}
+
+export default App;
+
+
+o/p:multiple_files_redux_operations with Hooks(before click).png
+multiple_files_redux_operations with Hooks(after click).png
+
+22-Cakes and IceCreams
+=======================
+
+Multiple Files Redux with Combine Reducer
+========================================
+=>npm install redux react-redux
+
+foldername:multiple_files_redux_operations_combine_reducer
+
+Code(Cake):
+++++++++++
+CakeAction.js:
+-------------
+export const BUY_CAKE = "BUY_CAKE";
+
+CakeActionType.js:
+------------------
+import {BUY_CAKE} from './CakeAction'
+
+function BuyCakeAction(){
+    return {
+        type:BUY_CAKE
+    }
+}
+export default BuyCakeAction;
+
+CakeReducer.js
+--------------
+import ActionType from './CakeActionType'
+import { BUY_CAKE } from './CakeAction'
+
+const initialState ={
+    cakes: 10
+}
+
+function CakeReducer(state = initialState, action){
+
+    switch(action.type){
+        case BUY_CAKE:
+            
+            return {
+                cakes: state.cakes-1,
+                
+            }
+        default:
+            return state;
+    }
+
+}
+
+export default CakeReducer;
+
+RootReducer:
+------------
+import CakeReducer from "./CakeReducer";
+import IceCreamReducer from "../IceCream/IceCreamReducer";
+import {combineReducers} from 'redux';
+
+const RootReducer=combineReducers({
+    cakeRootReducer:CakeReducer,
+    IceCreamTRootReducer:IceCreamReducer
+})
+
+export default RootReducer;
+
+Store.js
+------------
+import {createStore} from 'redux'
+import RootReducer from './RootReducer';
+
+const store = createStore(RootReducer);
+
+export default store;
+
+Code(IceCream):
++++++++++++++
+
+IceCreamAction.js
+----------------
+export const BUY_ICECREAM = "BUY_ICECREAM";
+
+IceCreamActionType.js
+---------------------
+import {BUY_ICECREAM} from './IceCreamAction'
+
+function BuyIceCreamAction(){
+    return {
+        type:BUY_ICECREAM
+    }
+}
+
+export default BuyIceCreamAction;
+
+IceCreamReducer.js
+-------------------
+import { BUY_ICECREAM } from './IceCreamAction'
+
+const initialState ={
+    icecream: 10
+}
+
+function IceCreamReducer(state = initialState, action){
+
+    switch(action.type){
+        case BUY_ICECREAM:
+            return {
+                icecream: state.icecream-1,  
+            }
+        default:
+            return state;
+    }
+
+}
+
+export default IceCreamReducer;
+
+
+DisplayCakes
+------------
+import {connect} from 'react-redux';
+import BuyCakeAction from '../Cake/CakeActionType'
+
+function DisplayCakesWithoutHooks(props){
+    return (
+        <>
+            <h3>Number of cakes left : {props.updateCake}</h3>
+            <button onClick={() => {props.buyCake()}}>BuyCake</button>
+        </>
+    )
+}
+
+function mapStateToProps(state)
+{
+    return {
+        updateCake: state.cakeRootReducer.cakes
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    // console.log(dispatch,1);
+    return {
+        buyCake : () =>{
+            dispatch(BuyCakeAction())
+        } 
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(DisplayCakesWithoutHooks);
+
+
+DisplayIceCream
+---------------
+import BuyIceCreamAction from '../IceCream/IceCreamActionType';
+import {useSelector,useDispatch} from 'react-redux';
+
+function DisplayIceCreamWithHooks(){
+    const icecreamvalue=useSelector((state)=>state.IceCreamTRootReducer.icecream);
+    const dispatch=useDispatch();
+    return (
+        <>
+            <p>Number of cakes left : {icecreamvalue}</p>
+            <button onClick={() => dispatch(BuyIceCreamAction())}>BuyIcecream</button>
+        </>
+    )
+}
+
+
+export default DisplayIceCreamWithHooks;
+
+
+App.js
+-------
+import logo from './logo.svg';
+import './App.css';
+import { Provider } from 'react-redux';
+import store from './Cake/Store';
+import DisplayCakesWithoutHooks from './DisplayCakesIcecream/DisplayCakesWithoutHooks';
+import DisplayIceCreamWithHooks from './DisplayCakesIcecream/DisplayIceCreamWithHooks';
+
+function App() {
+  return (
+    <div className="App">
+      <Provider store={store}>
+        <h1>performing Redux Operations using Combine Reducer</h1>
+        <h3>Cake without Hooks</h3>
+        <DisplayCakesWithoutHooks/>
+        <h3>IceCream with Hooks</h3>
+        <DisplayIceCreamWithHooks/>
+      </Provider>
+    </div>
+  );
+}
+
+export default App;
+
+
+o/p:Multiple_Files_Redux_Outputs_Combine_Reducers(Before Click).png
+Multiple_Files_Redux_Outputs_Combine_Reducers(Click on Cake).png
+Multiple_Files_Redux_Outputs_Combine_Reducers(Click on IceCream).png
+
+
+23-Logger Middleware
+===================
+=>npm install redux react-redux redux-logger
+
+foldername:multiple_files_redux_operations_logger_middleware
+
+=>The Middleware basically logs the information related to the redux store.
+
+
+Code(Cake):
+++++++++++
+CakeAction.js:
+-------------
+export const BUY_CAKE = "BUY_CAKE";
+
+CakeActionType.js:
+------------------
+import {BUY_CAKE} from './CakeAction'
+
+function BuyCakeAction(){
+    return {
+        type:BUY_CAKE
+    }
+}
+export default BuyCakeAction;
+
+CakeReducer.js
+--------------
+import ActionType from './CakeActionType'
+import { BUY_CAKE } from './CakeAction'
+
+const initialState ={
+    cakes: 10
+}
+
+function CakeReducer(state = initialState, action){
+
+    switch(action.type){
+        case BUY_CAKE:
+            
+            return {
+                cakes: state.cakes-1,
+                
+            }
+        default:
+            return state;
+    }
+
+}
+
+export default CakeReducer;
+RootReducer:
+------------
+import CakeReducer from "./CakeReducer";
+import IceCreamReducer from "../IceCream/IceCreamReducer";
+import {combineReducers} from 'redux';
+
+const RootReducer=combineReducers({
+    cakeRootReducer:CakeReducer,
+    IceCreamTRootReducer:IceCreamReducer
+})
+
+export default RootReducer;
+
+Store.js
+------------
+import {createStore,applyMiddleware} from 'redux'
+import logger from 'redux-logger';
+import RootReducer from './RootReducer';
+
+const store = createStore(RootReducer,applyMiddleware(logger));
+
+export default store;
+
+Code(IceCream):
++++++++++++++
+
+IceCreamAction.js
+----------------
+export const BUY_ICECREAM = "BUY_ICECREAM";
+
+IceCreamActionType.js
+---------------------
+import {BUY_ICECREAM} from './IceCreamAction'
+
+function BuyIceCreamAction(){
+    return {
+        type:BUY_ICECREAM
+    }
+}
+
+export default BuyIceCreamAction;
+
+IceCreamReducer.js
+-------------------
+import { BUY_ICECREAM } from './IceCreamAction'
+
+const initialState ={
+    icecream: 10
+}
+
+function IceCreamReducer(state = initialState, action){
+
+    switch(action.type){
+        case BUY_ICECREAM:
+            return {
+                icecream: state.icecream-1,  
+            }
+        default:
+            return state;
+    }
+
+}
+
+export default IceCreamReducer;
+
+
+DisplayCakes
+------------
+import {connect} from 'react-redux';
+import BuyCakeAction from '../Cake/CakeActionType'
+
+function DisplayCakesWithoutHooks(props){
+    return (
+        <>
+            <h3>Number of cakes left : {props.updateCake}</h3>
+            <button onClick={() => {props.buyCake()}}>BuyCake</button>
+        </>
+    )
+}
+
+function mapStateToProps(state)
+{
+    return {
+        updateCake: state.cakeRootReducer.cakes
+    }
+}
+
+function mapDispatchToProps(dispatch){
+    // console.log(dispatch,1);
+    return {
+        buyCake : () =>{
+            dispatch(BuyCakeAction())
+        } 
+    }
+}
+
+export default connect(mapStateToProps,mapDispatchToProps)(DisplayCakesWithoutHooks);
+
+
+DisplayIceCream
+---------------
+import BuyIceCreamAction from '../IceCream/IceCreamActionType';
+import {useSelector,useDispatch} from 'react-redux';
+
+function DisplayIceCreamWithHooks(){
+    const icecreamvalue=useSelector((state)=>state.IceCreamTRootReducer.icecream);
+    const dispatch=useDispatch();
+    return (
+        <>
+            <p>Number of cakes left : {icecreamvalue}</p>
+            <button onClick={() => dispatch(BuyIceCreamAction())}>BuyIcecream</button>
+        </>
+    )
+}
+
+
+export default DisplayIceCreamWithHooks;
+
+
+App.js
+-------
+import logo from './logo.svg';
+import './App.css';
+import { Provider } from 'react-redux';
+import store from './Cake/Store';
+import DisplayCakesWithoutHooks from './DisplayCakesIcecream/DisplayCakesWithoutHooks';
+import DisplayIceCreamWithHooks from './DisplayCakesIcecream/DisplayIceCreamWithHooks';
+
+function App() {
+  return (
+    <div className="App">
+      <Provider store={store}>
+        <h1>performing Redux Operations using Logger Middleware</h1>
+        <h3>Cake without Hooks</h3>
+        <DisplayCakesWithoutHooks/>
+        <h3>IceCream with Hooks</h3>
+        <DisplayIceCreamWithHooks/>
+      </Provider>
+    </div>
+  );
+}
+
+export default App;
+
+
+o/p:Multiple_Files_Redux_Outputs_Logger_Middleware(Before Click).png
+Multiple_Files_Redux_Outputs_Logger_Middleware(Click on Cake).png
+Multiple_Files_Redux_Outputs_Logger_Middleware(Click on IceCream).png
+
+
+
+o/p:
+BUY_CAKE
+prev state {cakeRootReducer: {…}, IceCreamTRootReducer: {…}}
+IceCreamTRootReducer: {icecream: 10}
+cakeRootReducer: {cakes: 10}
+[[Prototype]]: Object
+
+action  {type: 'BUY_CAKE'}
+type: "BUY_CAKE"
+[[Prototype]]: Object
+
+next state 
+{cakeRootReducer: {…}, IceCreamTRootReducer: {…}}
+IceCreamTRootReducer: {icecream: 10}
+cakeRootReducer: {cakes: 9}
+[[Prototype]]: Object
+
+
+BUY_ICECREAM 
+prev state {cakeRootReducer: {…}, IceCreamTRootReducer: {…}}
+IceCreamTRootReducer: {icecream: 10}
+cakeRootReducer: {cakes: 9}
+[[Prototype]]: Object
+
+action   {type: 'BUY_ICECREAM'}
+type: "BUY_ICECREAM"
+[[Prototype]]: Object
+
+next state {cakeRootReducer: {…}, IceCreamTRootReducer: {…}}
+IceCreamTRootReducer: {icecream: 9}
+cakeRootReducer: {cakes: 9}
+[[Prototype]]: Object
+
+
+25.Action payload
+=================
+
+
